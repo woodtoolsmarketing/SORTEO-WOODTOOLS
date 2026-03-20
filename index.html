@@ -185,7 +185,12 @@
         <div>
             <h1 style="color: var(--rojo-marca);">Sorteo Oficial</h1>
             <p id="contador-participantes">Leyendo archivo de base de datos...</p>
+            
             <button class="btn-rojo" id="btn-comenzar" onclick="iniciarSorteo()" disabled>Comenzar Sorteo</button>
+            
+            <input type="file" id="input-csv" accept=".csv" style="display: none;" onchange="leerArchivoManual(event)">
+            <br>
+            <button class="btn-rojo" id="btn-cargar-manual" onclick="document.getElementById('input-csv').click()" style="display: none; background-color: #555; margin-top: 15px; font-size: 1rem; padding: 10px 20px;">Subir CSV Manualmente</button>
         </div>
     </div>
 
@@ -203,57 +208,83 @@
     <script>
         let participantesUnicos = [];
 
-        // Función automática para leer el CSV
+        // 1. Intenta cargar automáticamente al iniciar
         async function cargarParticipantes() {
             try {
-                // Buscamos el archivo CSV que tiene que estar en la misma carpeta
-                const respuesta = await fetch('participantes.csv');
+                // Primero intenta buscar con el nombre que te sugerí
+                let respuesta = await fetch('participantes.csv');
                 
+                // Si no lo encuentra, intenta buscar con el nombre original larguísimo de Excel
                 if (!respuesta.ok) {
-                    throw new Error("No se encontró el archivo");
+                    respuesta = await fetch('Base de datos sorteo.xlsx - Hoja1.csv');
                 }
+
+                if (!respuesta.ok) throw new Error("Archivo no encontrado");
 
                 const textoCsv = await respuesta.text();
-                
-                // Separamos por línea
-                const lineas = textoCsv.split(/\r?\n/);
-                let todosLosUsuarios = [];
-
-                // Empezamos el bucle en 1 para saltear la fila de los títulos (Comentario, Usuario, Comentarios)
-                for (let i = 1; i < lineas.length; i++) {
-                    const linea = lineas[i].trim();
-                    if (linea !== '') {
-                        const columnas = linea.split(',');
-                        // La columna de 'Usuario' es la segunda (índice 1)
-                        if (columnas.length >= 2) {
-                            let usuario = columnas[1].trim();
-                            // Nos aseguramos de que no esté vacío
-                            if (usuario) {
-                                todosLosUsuarios.push(usuario);
-                            }
-                        }
-                    }
-                }
-
-                // Aplicamos el filtro para eliminar comentarios duplicados del mismo usuario
-                participantesUnicos = [...new Set(todosLosUsuarios)];
-                
-                document.getElementById('contador-participantes').innerText = `${participantesUnicos.length} participantes únicos validados`;
-                
-                // Habilitar el botón solo si hay suficientes participantes
-                if(participantesUnicos.length >= 3) {
-                    document.getElementById('btn-comenzar').disabled = false;
-                } else {
-                    document.getElementById('contador-participantes').innerText = "Error: Hay menos de 3 participantes en la base.";
-                }
+                procesarTextoCSV(textoCsv);
 
             } catch (error) {
-                console.error("Error al leer el CSV:", error);
-                document.getElementById('contador-participantes').innerText = "❌ Error: No se encontró el archivo 'participantes.csv'.";
+                console.error("No se pudo cargar automático:", error);
+                mostrarFalloCarga();
             }
         }
 
-        // Ejecutar la lectura del CSV ni bien carga la página
+        // 2. Lógica para separar y limpiar los datos del CSV
+        function procesarTextoCSV(textoCsv) {
+            const lineas = textoCsv.split(/\r?\n/);
+            let todosLosUsuarios = [];
+
+            // Salteamos la primera fila (títulos)
+            for (let i = 1; i < lineas.length; i++) {
+                const linea = lineas[i].trim();
+                if (linea !== '') {
+                    // Detectar si Excel separó por coma o punto y coma
+                    const separador = linea.includes(';') ? ';' : ',';
+                    const columnas = linea.split(separador);
+                    
+                    // Asegurarnos de que existe la columna B (índice 1)
+                    if (columnas.length >= 2) {
+                        // Limpiamos espacios y posibles comillas que agrega Excel
+                        let usuario = columnas[1].trim().replace(/['"]/g, '');
+                        if (usuario && usuario.toLowerCase() !== 'usuario') {
+                            todosLosUsuarios.push(usuario);
+                        }
+                    }
+                }
+            }
+
+            // Eliminamos duplicados
+            participantesUnicos = [...new Set(todosLosUsuarios)];
+            
+            if(participantesUnicos.length >= 3) {
+                document.getElementById('contador-participantes').innerText = `${participantesUnicos.length} participantes únicos validados`;
+                document.getElementById('btn-comenzar').disabled = false;
+                document.getElementById('btn-cargar-manual').style.display = 'none'; // Ocultamos botón de emergencia
+            } else {
+                mostrarFalloCarga();
+            }
+        }
+
+        // 3. Qué hacer si algo falla (mostrar el botón de emergencia)
+        function mostrarFalloCarga() {
+            document.getElementById('contador-participantes').innerText = "No se pudo leer la base automática. Subí el archivo .csv:";
+            document.getElementById('btn-cargar-manual').style.display = 'inline-block';
+        }
+
+        // 4. Lógica para leer el archivo si se sube manualmente con el botón
+        function leerArchivoManual(event) {
+            const archivo = event.target.files[0];
+            if (!archivo) return;
+
+            const lector = new FileReader();
+            lector.onload = function(e) {
+                const contenido = e.target.result;
+                procesarTextoCSV(contenido);
+            };
+            lector.readAsText(archivo);
+        }
+
         window.onload = cargarParticipantes;
 
         const ordenSorteo = [
@@ -319,7 +350,6 @@
             
             const contenedorLista = document.getElementById('lista-ganadores');
             
-            // Renderizamos en reversa para que el 1er puesto quede arriba (índice 2, 1, 0)
             for (let i = 2; i >= 0; i--) {
                 const ganador = ganadoresElegidos[i];
                 const config = ordenSorteo[i];
@@ -335,7 +365,6 @@
                 contenedorLista.innerHTML += html;
             }
 
-            // Animación: aparece primero el 1er puesto, luego 2do, luego 3ro
             setTimeout(() => document.getElementById('tarjeta-2').classList.add('mostrar'), 100);
             setTimeout(() => document.getElementById('tarjeta-1').classList.add('mostrar'), 600);
             setTimeout(() => document.getElementById('tarjeta-0').classList.add('mostrar'), 1100);
