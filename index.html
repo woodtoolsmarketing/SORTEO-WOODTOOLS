@@ -194,7 +194,6 @@
     </div>
 
     <script>
-        // Los nombres ahora incluyen el @ desde el principio
         const participantesUnicos = [
             "@nachotripaglia",
             "@estebanmeier",
@@ -226,11 +225,14 @@
             "@lil_heart2021"
         ];
 
+        // --- CORRECCIÓN AQUÍ ---
+        // Intercambié premio 1.png y premio 3.png en la lógica del código
         const ordenSorteo = [
-            { puesto: "3er Puesto", img: "imagenes/premio 3.png" },
+            { puesto: "3er Puesto", img: "imagenes/premio 1.png" }, // Antes premio 3.png
             { puesto: "2do Puesto", img: "imagenes/premio 2.png" },
-            { puesto: "1er Puesto", img: "imagenes/premio 1.png" }
+            { puesto: "1er Puesto", img: "imagenes/premio 3.png" }  // Antes premio 1.png
         ];
+        // -------------------------
 
         let ganadoresElegidos = [];
         let pasoActual = 0;
@@ -252,7 +254,6 @@
 
             const intervalo = setInterval(() => {
                 const nombreAlAzar = participantesUnicos[Math.floor(Math.random() * participantesUnicos.length)];
-                // Ya no le sumamos el "@" en código porque ya viene en el nombre
                 elementoRuleta.innerText = nombreAlAzar;
                 tiempo += velocidad;
 
@@ -272,7 +273,6 @@
             const ganador = participantesUnicos[indiceGanador];
             ganadoresElegidos.push(ganador);
             
-            // Tampoco le sumamos el "@" acá
             document.getElementById('texto-ruleta').innerText = "¡" + ganador + "!";
             
             setTimeout(() => {
