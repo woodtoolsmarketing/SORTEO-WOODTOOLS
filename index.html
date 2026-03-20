@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo WoodTools S.R.L.</title>
+    <style>
+        :root {
+            --gris-claro: #f4f4f4;
+            --rojo-marca: #cc0000;
+            --texto: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--gris-claro);
+            color: var(--texto);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .pantalla {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .oculto {
+            display: none !important;
+        }
+
+        #inicio {
+            margin-top: 10vh;
+        }
+
+        .logo-inicio {
+            max-width: 250px;
+            margin-bottom: 30px;
+        }
+
+        .btn-rojo {
+            background-color: var(--rojo-marca);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .btn-rojo:hover {
+            background-color: #a30000;
+            transform: scale(1.05);
+        }
+
+        #ruleta-container {
+            margin-top: 20vh;
+        }
+
+        .titulo-sorteo {
+            color: var(--rojo-marca);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .caja-ruleta {
+            background: white;
+            border: 3px solid var(--rojo-marca);
+            border-radius: 12px;
+            width: 90%;
+            padding: 30px 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--texto);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        #ganadores {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .titulo-final {
+            color: var(--rojo-marca);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* Nuevo diseño de tarjeta más compacto y horizontal */
+        .tarjeta-ganador {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: row; /* Imagen y texto lado a lado */
+            align-items: center;
+            text-align: left;
+            gap: 15px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease-out;
+            border-left: 5px solid var(--rojo-marca);
+        }
+
+        .tarjeta-ganador.mostrar {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .imagen-premio {
+            width: 90px;
+            height: 90px;
+            object-fit: contain; /* Para que no se recorte la sierra ni la camiseta */
+            border-radius: 8px;
+            background-color: #000; /* Fondo negro como en tus imágenes originales */
+        }
+
+        .info-premio {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .puesto-badge {
+            background-color: var(--rojo-marca);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+            width: fit-content;
+            margin-bottom: 5px;
+        }
+
+        .nombre-ganador {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--texto);
+            margin: 0;
+            word-break: break-all;
+        }
+
+        @media (min-width: 768px) {
+            #inicio {
+                flex-direction: row;
+                justify-content: center;
+                gap: 50px;
+                margin-top: 20vh;
+                max-width: 800px;
+            }
+            .logo-inicio {
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="inicio" class="pantalla">
+        <img src="imagenes/logo.png" alt="WoodTools SRL" class="logo-inicio">
+        <div>
+            <h1 style="color: var(--rojo-marca);">Sorteo Oficial</h1>
+            <p id="contador-participantes">Cargando participantes...</p>
+            <button class="btn-rojo" onclick="iniciarSorteo()">Comenzar Sorteo</button>
+        </div>
+    </div>
+
+    <div id="ruleta-container" class="pantalla oculto">
+        <h2 class="titulo-sorteo" id="titulo-ruleta">Sorteando 3er Puesto...</h2>
+        <div class="caja-ruleta" id="texto-ruleta">@participante</div>
+    </div>
+
+    <div id="ganadores" class="pantalla oculto">
+        <h2 class="titulo-final">¡Resultados Oficiales!</h2>
+        <div id="lista-ganadores" style="width: 100%;"></div>
+        <button class="btn-rojo" style="margin-top: 15px;" onclick="location.reload()">Nuevo Sorteo</button>
+    </div>
+
+    <script>
+        const comentariosExcel = [
+            "nachotripaglia", "nachotripaglia", "nachotripaglia", "nachotripaglia",
+            "estebanmeier", "estebanmeier", "estebanmeier",
+            "sotara.carpinteria", "sotara.carpinteria", "sotara.carpinteria", "sotara.carpinteria", "sotara.carpinteria",
+            "zukowskioscar", "guillermo_rodriguez_66", "hardholzcarpinteria",
+            "mueblestriana", "diegofer93", "madeamor_", "madeamor_"
+        ];
+
+        const participantesUnicos = [...new Set(comentariosExcel)];
+        document.getElementById('contador-participantes').innerText = `${participantesUnicos.length} participantes únicos validados`;
+
+        const ordenSorteo = [
+            { puesto: "3er Puesto", img: "imagenes/premio 3.png" },
+            { puesto: "2do Puesto", img: "imagenes/premio 2.png" },
+            { puesto: "1er Puesto", img: "imagenes/premio 1.png" }
+        ];
+
+        let ganadoresElegidos = [];
+        let pasoActual = 0;
+
+        function iniciarSorteo() {
+            if(participantesUnicos.length < 3) {
+                alert("Necesitás al menos 3 participantes distintos.");
+                return;
+            }
+            document.getElementById('inicio').classList.add('oculto');
+            document.getElementById('ruleta-container').classList.remove('oculto');
+            ejecutarRuleta();
+        }
+
+        function ejecutarRuleta() {
+            const configuracionActual = ordenSorteo[pasoActual];
+            document.getElementById('titulo-ruleta').innerText = `Sorteando ${configuracionActual.puesto}...`;
+            
+            const elementoRuleta = document.getElementById('texto-ruleta');
+            let tiempo = 0;
+            const duracionTotal = 3000;
+            const velocidad = 50;
+
+            const intervalo = setInterval(() => {
+                const nombreAlAzar = participantesUnicos[Math.floor(Math.random() * participantesUnicos.length)];
+                elementoRuleta.innerText = "@" + nombreAlAzar;
+                tiempo += velocidad;
+
+                if (tiempo >= duracionTotal) {
+                    clearInterval(intervalo);
+                    seleccionarGanadorDefinitivo();
+                }
+            }, velocidad);
+        }
+
+        function seleccionarGanadorDefinitivo() {
+            let indiceGanador;
+            do {
+                indiceGanador = Math.floor(Math.random() * participantesUnicos.length);
+            } while (ganadoresElegidos.includes(participantesUnicos[indiceGanador]));
+
+            const ganador = participantesUnicos[indiceGanador];
+            ganadoresElegidos.push(ganador);
+            
+            document.getElementById('texto-ruleta').innerText = "¡@" + ganador + "!";
+            
+            setTimeout(() => {
+                pasoActual++;
+                if (pasoActual < 3) {
+                    ejecutarRuleta();
+                } else {
+                    mostrarPantallaFinal();
+                }
+            }, 2000);
+        }
+
+        function mostrarPantallaFinal() {
+            document.getElementById('ruleta-container').classList.add('oculto');
+            document.getElementById('ganadores').classList.remove('oculto');
+            
+            const contenedorLista = document.getElementById('lista-ganadores');
+            
+            // Renderizamos en reversa para que el 1er puesto quede arriba (índice 2, 1, 0)
+            for (let i = 2; i >= 0; i--) {
+                const ganador = ganadoresElegidos[i];
+                const config = ordenSorteo[i];
+                const html = `
+                    <div class="tarjeta-ganador" id="tarjeta-${i}">
+                        <img src="${config.img}" alt="Premio ${config.puesto}" class="imagen-premio">
+                        <div class="info-premio">
+                            <div class="puesto-badge">${config.puesto}</div>
+                            <div class="nombre-ganador">@${ganador}</div>
+                        </div>
+                    </div>
+                `;
+                contenedorLista.innerHTML += html;
+            }
+
+            // Animación: aparece primero el 1er puesto, luego 2do, luego 3ro
+            setTimeout(() => document.getElementById('tarjeta-2').classList.add('mostrar'), 100);
+            setTimeout(() => document.getElementById('tarjeta-1').classList.add('mostrar'), 600);
+            setTimeout(() => document.getElementById('tarjeta-0').classList.add('mostrar'), 1100);
+        }
+    </script>
+</body>
+</html>
