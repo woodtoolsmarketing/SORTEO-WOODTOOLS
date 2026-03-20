@@ -64,12 +64,6 @@
             background-color: #a30000;
             transform: scale(1.05);
         }
-        
-        .btn-rojo:disabled {
-            background-color: #999;
-            cursor: not-allowed;
-            transform: none;
-        }
 
         #ruleta-container {
             margin-top: 20vh;
@@ -184,13 +178,8 @@
         <img src="imagenes/logo.png" alt="WoodTools SRL" class="logo-inicio">
         <div>
             <h1 style="color: var(--rojo-marca);">Sorteo Oficial</h1>
-            <p id="contador-participantes">Leyendo archivo de base de datos...</p>
-            
-            <button class="btn-rojo" id="btn-comenzar" onclick="iniciarSorteo()" disabled>Comenzar Sorteo</button>
-            
-            <input type="file" id="input-csv" accept=".csv" style="display: none;" onchange="leerArchivoManual(event)">
-            <br>
-            <button class="btn-rojo" id="btn-cargar-manual" onclick="document.getElementById('input-csv').click()" style="display: none; background-color: #555; margin-top: 15px; font-size: 1rem; padding: 10px 20px;">Subir CSV Manualmente</button>
+            <p id="contador-participantes">28 participantes únicos listos</p>
+            <button class="btn-rojo" id="btn-comenzar" onclick="iniciarSorteo()">Comenzar Sorteo</button>
         </div>
     </div>
 
@@ -206,86 +195,37 @@
     </div>
 
     <script>
-        let participantesUnicos = [];
-
-        // 1. Intenta cargar automáticamente al iniciar
-        async function cargarParticipantes() {
-            try {
-                // Primero intenta buscar con el nombre que te sugerí
-                let respuesta = await fetch('participantes.csv');
-                
-                // Si no lo encuentra, intenta buscar con el nombre original larguísimo de Excel
-                if (!respuesta.ok) {
-                    respuesta = await fetch('Base de datos sorteo.xlsx - Hoja1.csv');
-                }
-
-                if (!respuesta.ok) throw new Error("Archivo no encontrado");
-
-                const textoCsv = await respuesta.text();
-                procesarTextoCSV(textoCsv);
-
-            } catch (error) {
-                console.error("No se pudo cargar automático:", error);
-                mostrarFalloCarga();
-            }
-        }
-
-        // 2. Lógica para separar y limpiar los datos del CSV
-        function procesarTextoCSV(textoCsv) {
-            const lineas = textoCsv.split(/\r?\n/);
-            let todosLosUsuarios = [];
-
-            // Salteamos la primera fila (títulos)
-            for (let i = 1; i < lineas.length; i++) {
-                const linea = lineas[i].trim();
-                if (linea !== '') {
-                    // Detectar si Excel separó por coma o punto y coma
-                    const separador = linea.includes(';') ? ';' : ',';
-                    const columnas = linea.split(separador);
-                    
-                    // Asegurarnos de que existe la columna B (índice 1)
-                    if (columnas.length >= 2) {
-                        // Limpiamos espacios y posibles comillas que agrega Excel
-                        let usuario = columnas[1].trim().replace(/['"]/g, '');
-                        if (usuario && usuario.toLowerCase() !== 'usuario') {
-                            todosLosUsuarios.push(usuario);
-                        }
-                    }
-                }
-            }
-
-            // Eliminamos duplicados
-            participantesUnicos = [...new Set(todosLosUsuarios)];
-            
-            if(participantesUnicos.length >= 3) {
-                document.getElementById('contador-participantes').innerText = `${participantesUnicos.length} participantes únicos validados`;
-                document.getElementById('btn-comenzar').disabled = false;
-                document.getElementById('btn-cargar-manual').style.display = 'none'; // Ocultamos botón de emergencia
-            } else {
-                mostrarFalloCarga();
-            }
-        }
-
-        // 3. Qué hacer si algo falla (mostrar el botón de emergencia)
-        function mostrarFalloCarga() {
-            document.getElementById('contador-participantes').innerText = "No se pudo leer la base automática. Subí el archivo .csv:";
-            document.getElementById('btn-cargar-manual').style.display = 'inline-block';
-        }
-
-        // 4. Lógica para leer el archivo si se sube manualmente con el botón
-        function leerArchivoManual(event) {
-            const archivo = event.target.files[0];
-            if (!archivo) return;
-
-            const lector = new FileReader();
-            lector.onload = function(e) {
-                const contenido = e.target.result;
-                procesarTextoCSV(contenido);
-            };
-            lector.readAsText(archivo);
-        }
-
-        window.onload = cargarParticipantes;
+        // Base de datos de participantes extraída de tu Excel y filtrada (Sin duplicados)
+        const participantesUnicos = [
+            "nachotripaglia",
+            "estebanmeier",
+            "sotara.carpinteria",
+            "zukowskioscar",
+            "guillermo_rodriguez_66",
+            "hardholzcarpinteria",
+            "mueblestriana",
+            "diegofer93",
+            "madeamor_",
+            "saracchiguido",
+            "nicovpatagonia",
+            "jazmincelizz",
+            "revb.control",
+            "girocarpinteria",
+            "mauronoir",
+            "sgprosperi",
+            "garciagaston268",
+            "godoysergiojavier",
+            "craxon",
+            "mar_bou",
+            "auryzelaschi",
+            "cuki.juanx",
+            "sebasroses8",
+            "hectorpicca",
+            "_biann._1",
+            "mama.de.3_",
+            "soylele1651",
+            "lil_heart2021"
+        ];
 
         const ordenSorteo = [
             { puesto: "3er Puesto", img: "imagenes/premio 3.png" },
