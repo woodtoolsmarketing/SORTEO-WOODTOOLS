@@ -183,7 +183,7 @@
     </div>
 
     <div id="ruleta-container" class="pantalla oculto">
-        <h2 class="titulo-sorteo" id="titulo-ruleta">Sorteando 3er Puesto...</h2>
+        <h2 class="titulo-sorteo" id="titulo-ruleta">Sorteando 2do Puesto...</h2>
         <div class="caja-ruleta" id="texto-ruleta">cargando...</div>
     </div>
 
@@ -194,42 +194,27 @@
     </div>
 
     <script>
+        // Nueva lista de participantes
         const participantesUnicos = [
-            "@nachotripaglia",
-            "@estebanmeier",
-            "@sotara.carpinteria",
-            "@zukowskioscar",
-            "@guillermo_rodriguez_66",
-            "@hardholzcarpinteria",
-            "@mueblestriana",
-            "@diegofer93",
-            "@madeamor_",
-            "@saracchiguido",
-            "@nicovpatagonia",
-            "@jazmincelizz",
-            "@revb.control",
-            "@girocarpinteria",
-            "@mauronoir",
-            "@sgprosperi",
-            "@garciagaston268",
-            "@godoysergiojavier",
-            "@craxon",
-            "@mar_bou",
-            "@auryzelaschi",
-            "@cuki.juanx",
-            "@sebasroses8",
-            "@hectorpicca",
-            "@_biann._1",
-            "@mama.de.3_",
-            "@soylele1651",
-            "@lil_heart2021"
+            "@lucas_f660", "@tomas.fe23", "@kikoykoko", "@pclogin.tecnico", 
+            "@sabri_carpinteria_a_medida_", "@zukowskioscar", "@herederossf", 
+            "@beth.floress83", "@guillermoriver7", "@bboyvictore", "@luzbono", 
+            "@gasparzimmermann", "@lareinadeltorrontes", "@mariano.d.pedernera", 
+            "@feelii_pe", "@soy_alexis_metz", "@roy_gonzalezf", "@adeladomski", 
+            "@her_orieta", "@susanasoycocinera", "@guillermo_rodriguez_66", 
+            "@shulianacardozo09", "@nolberto.avla", "@oropelbeto", "@pablodiana01", 
+            "@monywall46", "@emilia.gigena", "@gabyds1", "@mariabelencba", 
+            "@albertomartinez196262", "@diegorodriguez5041", "@amara_muebles.ok", 
+            "@botymerkdo", "@jucarmarti8", "@aguitapetrolera", "@maria.belen.michl", 
+            "@mamitaterremot0", "@lizettedurand", "@yayifitnes", "@ponseadolfogabriel", 
+            "@soldeprimavera43", "@angie_zeballo", "@123pepetop", "@mar1977xd", 
+            "@ca_rina4625"
         ];
 
-        // --- ORDEN ADAPTADO A TUS NUEVOS NOMBRES ---
+        // --- ORDEN ADAPTADO A 2 PREMIOS ---
         const ordenSorteo = [
-            { puesto: "3er Puesto", img: "imagenes/premio 3.png" }, // Camiseta sola
-            { puesto: "2do Puesto", img: "imagenes/premio 2.png" }, // Camiseta + 25% OFF
-            { puesto: "1er Puesto", img: "imagenes/premio 1.png" }  // Sierra + Camiseta
+            { puesto: "2do Puesto", img: "imagenes/Premio 2.png" }, // Premio 2
+            { puesto: "1er Puesto", img: "imagenes/premio 1.png" }  // Premio 1
         ];
 
         let ganadoresElegidos = [];
@@ -275,7 +260,7 @@
             
             setTimeout(() => {
                 pasoActual++;
-                if (pasoActual < 3) {
+                if (pasoActual < 2) { // Cambiado para que se detenga al llegar al 2do paso
                     ejecutarRuleta();
                 } else {
                     mostrarPantallaFinal();
@@ -289,7 +274,8 @@
             
             const contenedorLista = document.getElementById('lista-ganadores');
             
-            for (let i = 2; i >= 0; i--) {
+            // Cambiado para iterar solo 2 veces (índices 1 y 0)
+            for (let i = 1; i >= 0; i--) {
                 const ganador = ganadoresElegidos[i];
                 const config = ordenSorteo[i];
                 const html = `
@@ -304,9 +290,9 @@
                 contenedorLista.innerHTML += html;
             }
 
-            setTimeout(() => document.getElementById('tarjeta-2').classList.add('mostrar'), 100);
-            setTimeout(() => document.getElementById('tarjeta-1').classList.add('mostrar'), 600);
-            setTimeout(() => document.getElementById('tarjeta-0').classList.add('mostrar'), 1100);
+            // Animación para mostrar las dos tarjetas en orden
+            setTimeout(() => document.getElementById('tarjeta-1').classList.add('mostrar'), 100);
+            setTimeout(() => document.getElementById('tarjeta-0').classList.add('mostrar'), 600);
         }
     </script>
 </body>
